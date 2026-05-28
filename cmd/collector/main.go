@@ -14,6 +14,7 @@ import (
 	"github.com/MunyTa/Lab-14/internal/coordination"
 	"github.com/MunyTa/Lab-14/internal/market"
 	"github.com/MunyTa/Lab-14/internal/rustvalidator"
+	"github.com/MunyTa/Lab-14/internal/streaming"
 	"github.com/MunyTa/Lab-14/internal/transport"
 )
 
@@ -29,6 +30,8 @@ func main() {
 		outPath     = flag.String("out", "out/candles.jsonl", "JSONL output path")
 		batchPath   = flag.String("batch", "out/candles_recordbatch.json", "columnar batch output path")
 		etcdURL     = flag.String("etcd", "", "optional etcd endpoint, for example http://localhost:2379")
+		natsURL     = flag.String("nats-url", "", "optional NATS endpoint, for example nats://localhost:4222")
+		natsSubject = flag.String("nats-subject", "lab14.crypto.candles", "NATS subject for aggregated candles")
 	)
 	flag.Parse()
 
@@ -54,6 +57,12 @@ func main() {
 
 	candles := collect(ctx, assigned, *window, *maxRecords, *ticks, *interval)
 	sortCandles(candles)
+	if *natsURL != "" {
+		publisher, err := streaming.NewNATSPublisher(ctx, *natsURL, *natsSubject)
+		must(err)
+		defer publisher.Close()
+		must(publisher.PublishCandles(candles))
+	}
 	must(transport.WriteCandlesJSONL(*outPath, candles))
 	must(transport.WriteBatchJSON(*batchPath, candles))
 

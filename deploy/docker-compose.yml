@@ -8,13 +8,19 @@ services:
     ports:
       - "2379:2379"
 
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
+
   collector-0:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    command: ["-worker-id=0", "-workers=2", "-etcd=http://etcd:2379", "-out=/data/candles-0.jsonl", "-batch=/data/batch-0.json"]
+    command: ["-worker-id=0", "-workers=2", "-etcd=http://etcd:2379", "-nats-url=nats://nats:4222", "-out=/data/candles-0.jsonl", "-batch=/data/batch-0.json"]
     depends_on:
       - etcd
+      - nats
     volumes:
       - ../out:/data
 
@@ -22,9 +28,9 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    command: ["-worker-id=1", "-workers=2", "-etcd=http://etcd:2379", "-out=/data/candles-1.jsonl", "-batch=/data/batch-1.json"]
+    command: ["-worker-id=1", "-workers=2", "-etcd=http://etcd:2379", "-nats-url=nats://nats:4222", "-out=/data/candles-1.jsonl", "-batch=/data/batch-1.json"]
     depends_on:
       - etcd
+      - nats
     volumes:
       - ../out:/data
-
