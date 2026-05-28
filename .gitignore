@@ -1,0 +1,10 @@
+/.gocache/
+/.gomodcache/
+/.tmp/
+/bin/
+/out/
+/reports/generated/
+*.exe
+*.test
+*.pdf
+
