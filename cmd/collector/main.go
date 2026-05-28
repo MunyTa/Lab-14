@@ -13,6 +13,7 @@ import (
 
 	"github.com/MunyTa/Lab-14/internal/coordination"
 	"github.com/MunyTa/Lab-14/internal/market"
+	"github.com/MunyTa/Lab-14/internal/rustvalidator"
 	"github.com/MunyTa/Lab-14/internal/transport"
 )
 
@@ -72,6 +73,9 @@ func collect(ctx context.Context, symbols []string, window time.Duration, maxRec
 		}
 
 		for _, tick := range simulator.Next() {
+			if err := rustvalidator.ValidateTick(tick); err != nil {
+				continue
+			}
 			candles = append(candles, aggregator.Add(tick)...)
 		}
 		if interval > 0 {

@@ -1,0 +1,9 @@
+[package]
+name = "lab14_validator"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "lab14_validator"
+crate-type = ["cdylib", "staticlib"]
+
