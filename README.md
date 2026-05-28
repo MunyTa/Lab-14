@@ -15,7 +15,10 @@
 - распределение символов между несколькими Go-сборщиками;
 - optional регистрация назначений worker-ов в etcd через `/v3/kv/put`;
 - оконная агрегация OHLCV в Go до передачи в Python;
-- columnar RecordBatch-файл как промежуточный слой для Arrow/pyarrow-конвертации;
+- бинарный Apache Arrow IPC stream через `pyarrow` и optional Go Arrow HTTP server;
+- Rust-библиотека валидации с C ABI и Go cgo-интеграцией через build tag `rustvalidate`;
+- потоковая передача агрегированных свечей через NATS;
+- Python consumer со скользящим окном поверх NATS-потока;
 - Python-анализ с очисткой, агрегацией, SVG-графиками и optional Polars/DuckDB;
 - FastAPI + WebSocket dashboard для просмотра последних свечей;
 - Docker Compose с etcd и двумя collector-экземплярами;
@@ -33,10 +36,11 @@ Go collector workers -> sharding -> optional etcd assignment registry
 tumbling OHLCV aggregation
         |
         +--> out/candles.jsonl
-        +--> out/candles_recordbatch.json
+        +--> out/candles.arrow (Apache Arrow IPC)
+        +--> NATS subject lab14.crypto.candles
         |
         v
-Python analysis -> reports/generated/*.json + *.svg
+Python analysis / sliding-window consumer -> reports/*.json + *.svg
         |
         v
 FastAPI dashboard
@@ -67,6 +71,42 @@ go run ./cmd/collector -symbols BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT -workers 2 -work
 python scripts/analyze.py out/candles.jsonl
 ```
 
+Apache Arrow IPC:
+
+```powershell
+python scripts/arrow_ipc.py out/candles.jsonl out/candles.arrow
+```
+
+Optional Go Arrow HTTP server:
+
+```powershell
+go mod tidy
+go run -tags arrow ./cmd/arrow-server -input out/candles.jsonl -addr :8081
+```
+
+NATS-поток:
+
+```powershell
+docker compose -f deploy/docker-compose.yml up nats
+go run ./cmd/collector -nats-url nats://localhost:4222 -ticks 180
+python scripts/nats_sliding_consumer.py --window-seconds 300
+```
+
+Rust-валидация через cgo:
+
+```powershell
+cd rust_validator
+cargo build --release
+cd ..
+go run -tags rustvalidate ./cmd/collector
+```
+
+Performance benchmark:
+
+```powershell
+python scripts/benchmark_performance.py
+```
+
 Полный Python-стек для Polars, DuckDB, pyarrow и dashboard:
 
 ```powershell
@@ -92,7 +132,11 @@ kubectl apply -f deploy/k8s/collector-hpa.yaml
 - `internal/market/window.go` выполняет оконную агрегацию на стороне Go.
 - `internal/market/sharding.go` делит пары между несколькими сборщиками.
 - `internal/coordination/etcd.go` регистрирует назначения worker-ов в etcd.
-- `internal/transport/batch.go` формирует columnar RecordBatch с фиксированной схемой.
+- `scripts/arrow_ipc.py` пишет настоящий бинарный Apache Arrow IPC stream.
+- `cmd/arrow-server/main.go` отдает Arrow IPC stream по HTTP при сборке с `-tags arrow`.
+- `rust_validator/src/lib.rs` содержит Rust-валидацию, `internal/rustvalidator/validator_cgo.go` подключает ее через cgo.
+- `internal/streaming/nats.go` публикует свечи в NATS, `scripts/nats_sliding_consumer.py` считает скользящее окно.
+- `reports/performance.md` содержит фактические замеры Go vs Python и JSONL vs Arrow.
 - `scripts/analyze.py` чистит данные, агрегирует результаты и строит 2 SVG-графика.
 - `dashboard/app.py` показывает свежие свечи через WebSocket.
 - `deploy/k8s/collector-hpa.yaml` содержит HPA для автоскалирования.
@@ -104,5 +148,5 @@ kubectl apply -f deploy/k8s/collector-hpa.yaml
 1. добавлены красные тесты для агрегации, шардирования, валидации и batch-представления;
 2. реализовано Go-ядро до зеленых тестов;
 3. добавлены CLI, анализ, dashboard, deployment и документация;
-4. после каждого этапа выполнен отдельный commit и push.
-
+4. по итогам review добавлены Arrow IPC, Rust/cgo, NATS streaming, фактический performance report и `PROMPT_LOG.md`;
+5. после каждого этапа выполнен отдельный commit и push.

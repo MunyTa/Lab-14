@@ -1,0 +1,26 @@
+{
+  "pyarrow_version": "24.0.0",
+  "go": {
+    "name": "Go collector",
+    "command": "C:\\Users\\Kuzmi\\OneDrive\\Desktop\\\u041b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u043d\u0430\u044f 14\\bin\\collector.exe -ticks 50000 -symbols BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT -out C:\\Users\\Kuzmi\\OneDrive\\Desktop\\\u041b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u043d\u0430\u044f 14\\out\\bench_go_candles.jsonl -batch C:\\Users\\Kuzmi\\OneDrive\\Desktop\\\u041b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u043d\u0430\u044f 14\\out\\bench_batch.json",
+    "elapsed_ms": 109.98730000574142,
+    "cpu_seconds": 0.046875,
+    "peak_rss_mb": 50.8203125,
+    "rows": 3336,
+    "bytes_written": 723028
+  },
+  "python": {
+    "name": "Python asyncio collector",
+    "command": "C:\\Users\\Kuzmi\\AppData\\Local\\Programs\\Python\\Python312\\python.exe C:\\Users\\Kuzmi\\OneDrive\\Desktop\\\u041b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u043d\u0430\u044f 14\\scripts\\python_collector.py --ticks 50000 --symbols BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT --out C:\\Users\\Kuzmi\\OneDrive\\Desktop\\\u041b\u0430\u0431\u043e\u0440\u0430\u0442\u043e\u0440\u043d\u0430\u044f 14\\out\\bench_python_ticks.jsonl",
+    "elapsed_ms": 1725.085099998978,
+    "cpu_seconds": 1.65625,
+    "peak_rss_mb": 22.078125,
+    "rows": 200000,
+    "bytes_written": 18468520
+  },
+  "json_bytes": 723028,
+  "arrow_bytes": 401568,
+  "arrow_write_ms": 25.9894000046188,
+  "json_read_ms": 23.48350000102073,
+  "arrow_read_ms": 13.994799999636598
+}

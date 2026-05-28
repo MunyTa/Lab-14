@@ -1,21 +1,27 @@
-# Performance notes
+# Performance report
 
-The collector is deterministic by default, so Go and Python implementations can be compared with the same symbols and tick count.
+Measurements were collected locally on 2026-05-28 for variant 8 with 4 symbols and 50,000 simulated ticks per symbol.
 
-Recommended run:
+## Go vs Python collection
 
-```powershell
-$env:GOTELEMETRY='off'
-go run ./cmd/collector -ticks 10000 -symbols BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT -out out/go_candles.jsonl
-python scripts/python_collector.py --ticks 10000 --out out/python_ticks.jsonl
-```
+| Collector | Rows written | Elapsed, ms | Rows/s | Peak RSS, MB | CPU seconds | Output bytes |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Go collector | 3336 | 109.99 | 30330.77 | 50.82 | 0.05 | 723028 |
+| Python asyncio collector | 200000 | 1725.09 | 115936.31 | 22.08 | 1.66 | 18468520 |
 
-Metrics to compare:
+The Go collector writes aggregated OHLCV candles, while the Python collector writes raw ticks. This demonstrates the expected reduced downstream volume after tumbling-window aggregation in Go.
 
-- elapsed time printed by each collector;
-- number of emitted rows;
-- generated JSONL size;
-- CPU and memory from the container runtime or OS task monitor.
+## JSONL vs Apache Arrow IPC
 
-The Go collector performs tumbling-window aggregation before writing data, so it emits fewer rows than the Python tick producer. That matches the elevated-complexity requirement to reduce data volume before the Python analysis stage.
+| Transport | Size, bytes | Read time, ms |
+| --- | ---: | ---: |
+| JSONL | 723028 | 23.48 |
+| Arrow IPC stream | 401568 | 13.99 |
 
+Arrow IPC write time: 25.99 ms.  
+pyarrow version: 24.0.0.
+
+Charts:
+
+- `reports/performance_go_python.svg`
+- `reports/arrow_vs_json_size.svg`
