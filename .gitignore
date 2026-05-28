@@ -4,7 +4,7 @@
 /bin/
 /out/
 /reports/generated/
+__pycache__/
 *.exe
 *.test
 *.pdf
-

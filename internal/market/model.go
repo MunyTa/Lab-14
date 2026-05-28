@@ -22,4 +22,3 @@ type Candle struct {
 	Count       int       `json:"count"`
 	Source      string    `json:"source"`
 }
-

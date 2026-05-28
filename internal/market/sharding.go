@@ -42,4 +42,3 @@ func (p *ShardPlan) WorkerCount() int {
 	}
 	return len(p.assignments)
 }
-

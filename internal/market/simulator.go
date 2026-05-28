@@ -40,4 +40,3 @@ func (s *Simulator) Next() []Tick {
 func round4(value float64) float64 {
 	return math.Round(value*10000) / 10000
 }
-

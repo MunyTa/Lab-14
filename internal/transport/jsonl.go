@@ -45,4 +45,3 @@ func WriteBatchJSON(path string, candles []market.Candle) error {
 
 	return WriteRecordBatchJSON(file, candles)
 }
-

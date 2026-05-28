@@ -23,4 +23,3 @@ func ValidateTick(tick Tick) error {
 	}
 	return nil
 }
-

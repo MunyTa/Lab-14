@@ -60,4 +60,3 @@ func WriteRecordBatchJSON(writer io.Writer, candles []market.Candle) error {
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(NewCandleRecordBatch(candles))
 }
-

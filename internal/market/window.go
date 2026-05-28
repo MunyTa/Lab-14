@@ -93,4 +93,3 @@ func updateCandle(candle *Candle, tick Tick) {
 	candle.Volume += tick.Quantity
 	candle.Count++
 }
-
